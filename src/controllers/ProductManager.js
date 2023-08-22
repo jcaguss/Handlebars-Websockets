@@ -91,7 +91,7 @@ export default class ProductManager extends Product {
         if(!prodById) return "Not found"
         await this.delateProductsById(id)
         const prodsOld = await this.readProducts();
-        const updateProduct = [{...product , id : id}, ... prodsOld]
+        const updateProduct = [ ... prodsOld,{...product , id : id}]
         await this.writeProducts(updateProduct);
         return "Updated product"
     }
