@@ -1,67 +1,7 @@
 import {promises as fs} from 'fs'
 
-export default class ProductManager {
-
-    constructor() {
-        this.path = './src/models/productos.json' // Archivo json
-        this.products = []; //Array vacio de productos
-    }
-
-    writeProducts = async (prod) =>{ 
-        await fs.writeFile(this.path, JSON.stringify(prod))
-    }
-
-    readProducts = async () => { // Metodo para leer todos los Productos
-        try{
-            const prods = await fs.readFile(this.path, 'utf-8')
-            return JSON.parse(prods);
-        }
-        catch{
-            return [];
-            console.log("error")
-        }
-            
-    }
-
-    addProducts = async (product) => { // Metodo para añadir productos
-        this.products.push(new Product(product))
-        const productOld = await this.readProducts();
-        const productAll = [...productOld,product];
-        await this.writeProducts(productAll)
-    }
-    
-
-    getProducts = async () => { // Metodo para mostrar los productos del archivo json
-        const res = await this.readProducts()
-        console.log(res)
-    }
-
-    getProductById = async (id) =>{ // Metodo para mostrar un producto por su id
-        const res = await this.readProducts()
-        const product = res.find(product => product.id === id);
-        !product ? console.log("Not found") : console.log(product);
-        return product;
-    }
-
-    delateProductsById = async (id) =>{ // Metodo para eliminar por el id
-        const  res = await this.readProducts() 
-        const prod = res.filter(product => product.id !== id)
-        !prod ? console.log('Not found')
-        :await this.writeProducts(prod)
-    }
-
-    updateProducts = async ({id, ...product}) => { // Metodo para modificar
-        await this.delateProductsById(id)
-        const productOld = await this.readProducts();
-        const updateProduct = [{...product , id}, ...productOld]
-        await this.writeProducts(updateProduct)
-    }
-} 
-
 class Product {
-    static id = 1; // Contador para los id
-
-    constructor(title, description, code, price, status, stock, category, thumbnail) {
+    constructor(title, description, code, price, status, stock, category, thumbnail,id) {
         this.title = title;
         this.description = description;
         this.code = code;
@@ -70,13 +10,101 @@ class Product {
         this.stock = stock;
         this.category = category;
         this.thumbnail = thumbnail;
-        this.id = Product.id++; // Incrementamos el id en 1
+        this.id = id;
     }
 }
 
-// const manager = new ProductManager(); // Creamos una instancia de ProductManager
+export default class ProductManager extends Product {
+    constructor() {
+        super();
+        this.path = './src/models/products.json' // Archivo json
+        this.products = []; //Array vacio de productos
+    }
 
-// manager.addProducts("Laptop", "Laptop msi ...", "tec1234", "1500", "true", "100", "Tecnologia", "url/fasdfasdf");
+    
+    readProducts = async () =>{
+        try{
+            const products = await fs.readFile(this.path, "utf-8")
+            return JSON.parse(products)
+        }catch{
+            return[]
+        }
+        
+    }
+    
+    writeProducts = async (prod) => {
+        await fs.writeFile(this.path,JSON.stringify(prod));
+    }
+
+    existCode = async (code) =>{
+        const prods = await this.readProducts();
+        return prods.some(product => product.code === code )
+    }
+
+    addProducts = async (prod) => {
+        const prodsOld = await this.readProducts()
+        if(!prod.title || !prod.description || !prod.price || !prod.code ||!prod.stock || !prod.category || !prod.status){
+            console.log('The arguments are not defined')
+        }else if(await this.existCode(prod.code)){
+            console.log("The product already exists")
+        }else{
+            this.products.push(...prodsOld,prod)
+            console.log(this.products)
+            const newProduct = new Product(prod.title,prod.description,prod.code,prod.price,prod.status,prod.stock,prod.category,prod.thumbnail,prod.id)
+            const prodAll = [...prodsOld, newProduct];
+            await this.writeProducts(prodAll);
+            return "Product added"
+        }
+        
+    }
+
+    getProducts = async () => { // Metodo para mostrar los productos del archivo json
+        const res = await this.readProducts()
+        console.log(res)
+    }
+
+    existProd = async (id) => {
+        const prods = await this.readProducts();
+        return prods.find(prod => prod.id === id)
+    }
+
+    getProductById = async (id) =>{ // Metodo para mostrar un producto por su id
+        const prodId = await this.existProd(id);
+        console.log(prodId);
+        if(!prodId) return "Not found"
+        return prodId;
+    }
+
+    delateProductsById = async (id) =>{ // Metodo para eliminar por el id
+        const  prods = await this.readProducts() 
+        const existProd = prods.some(prod => prod.id !== id)
+        if(existProd){
+            const filterProd = prods.filter(prod => prod.id != id)
+            await this.writeProducts(filterProd);
+            return "product removed"
+        }
+        return "Not found"
+    }
+
+    updateProducts = async (id, product) => { // Metodo para modificar
+        const prodById = await this.existProd(id);
+        if(!prodById) return "Not found"
+        await this.delateProductsById(id)
+        const prodsOld = await this.readProducts();
+        const updateProduct = [{...product , id : id}, ... prodsOld]
+        await this.writeProducts(updateProduct);
+        return "Updated product"
+    }
+} 
 
 
-// manager.getProducts();
+
+
+// const product = new ProductManager(); // Creamos una instancia de ProductManager
+
+
+// product.addProducts({"title":"Laptop","description":"Laptop msi ...","code":"tec1234","price":"1500","status": "true", "stock": "100","category": "Tecnologia","thumbnail":"url/fasdfasdf"});
+
+
+// product.getProductById(1);
+
