@@ -41,6 +41,11 @@ export default class ProductManager extends Product {
         return prods.some(product => product.code === code )
     }
 
+    existProd = async (id) => {
+        const prods = await this.readProducts();
+        return prods.find(prod => prod.id === id)
+    }
+
     addProducts = async (prod) => {
         const prodsOld = await this.readProducts()
         if(!prod.title || !prod.description || !prod.price || !prod.code ||!prod.stock || !prod.category || !prod.status){
@@ -63,10 +68,7 @@ export default class ProductManager extends Product {
         console.log(res)
     }
 
-    existProd = async (id) => {
-        const prods = await this.readProducts();
-        return prods.find(prod => prod.id === id)
-    }
+    
 
     getProductById = async (id) =>{ // Metodo para mostrar un producto por su id
         const prodId = await this.existProd(id);
