@@ -3,8 +3,8 @@ import {promises as fs} from 'fs'
 
 export default class CartManager {
     constructor(){
-        this.path = "./models/carts.json"
-        this.pathProd = "./models/products.json"
+        this.path = "./src/models/carts.json"
+        this.pathProd = "./src/models/products.json"
     }
 
     readProducts = async () => {
