@@ -78,9 +78,9 @@ export default class CartManager {
     }
 }
 
-const cart = new CartManager;
+// const cart = new CartManager;
 
-cart.addProductInCart(1,1);
+// cart.addProductInCart(1,1);
 // cart.getCartById(1);
 // const prodss = await product.getProductById(1);
 // console.log(prodss)

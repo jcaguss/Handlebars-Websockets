@@ -23,10 +23,10 @@ cartsRouter.get("/:id", async(req, res)=>{
     !cartById ? res.status(400).send({"error":"The cart does not exist"}) : res.status(200).send(cartById)
 })
 
-cartsRouter.post("/cid/products/pid" , async(req, res) => {
-    const cartId = req.params.cid
+cartsRouter.post("/:cid/products/:pid" , async(req, res) => {
+    const cartId =  parseInt(req.params.cid)
     console.log(cartId)
-    const prodId = req.params.pid
+    const prodId =  parseInt(req.params.pid)
     console.log(prodId)
     res.status(200).send(await cart.addProductInCart(cartId,prodId))
 })
